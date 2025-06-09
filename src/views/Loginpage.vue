@@ -115,7 +115,7 @@ import "mosha-vue-toastify/dist/style.css";
 
 async function redirectToGoogle() {
   try {
-    window.location.href = "http://localhost:8000/auth/google/redirect";
+    window.location.href = "https://gcch-backend.onrender.com/auth/google/redirect";
   } catch (error) {
     console.error("Google redirect error:", error);
     createToast("Failed to connect with Google. Please try again.", {
