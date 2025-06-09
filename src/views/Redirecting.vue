@@ -14,8 +14,14 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 onMounted(async () => {
-  const params = new URLSearchParams(window.location.search);
+  // Clean the URL: get query string and remove hash fragments like #/login
+  const fullUrl = window.location.href;
+  const queryString = fullUrl.includes('?') ? fullUrl.split('?')[1] : '';
+  const cleanQuery = queryString.split('#')[0];
+  const params = new URLSearchParams(cleanQuery);
+
   const payloadRaw = params.get('payload');
+
   let payload = {};
   try {
     payload = JSON.parse(payloadRaw);
@@ -23,14 +29,15 @@ onMounted(async () => {
     router.push('/login');
     return;
   }
+
   if (!payload.user.role) {
     localStorage.setItem('onboarding_in_progress', 'true');
   }
 
-  // Store token and user info
   if (payload.token) localStorage.setItem('token', payload.token);
   if (payload.user && payload.user.id) {
     localStorage.setItem('user_id', payload.user.id);
+
     if (payload.user.role) {
       localStorage.setItem('user_role', payload.user.role);
       localStorage.removeItem('onboarding_in_progress');
@@ -39,7 +46,6 @@ onMounted(async () => {
     }
   }
 
-  // Debug logs
   console.log('Payload:', payload);
   console.log('Redirect:', payload.redirect);
 
@@ -47,6 +53,7 @@ onMounted(async () => {
   router.push(payload.redirect || '/login');
 });
 </script>
+
 
 
 <style scoped>
