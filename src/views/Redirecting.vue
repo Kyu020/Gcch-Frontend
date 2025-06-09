@@ -9,41 +9,34 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 
 onMounted(async () => {
-  // Clean the URL: get query string and remove hash fragments like #/login
-  const fullUrl = window.location.href;
-  const queryString = fullUrl.includes('?') ? fullUrl.split('?')[1] : '';
-  const cleanQuery = queryString.split('#')[0];
-  const params = new URLSearchParams(cleanQuery);
+  const code = route.query.code;
 
-  const payloadRaw = params.get('payload');
-
-  
-  if (!payloadRaw) {
-    console.warn('No payload found in URL query params, redirecting to login.');
+  if (!code) {
     router.push('/login');
     return;
   }
 
-
-  let payload = {};
   try {
-    payload = JSON.parse(payloadRaw);
-  } catch (e) {
-    router.push('/login');
-    return;
-  }
+    const response = await fetch(`https://your-backend.com/api/auth/google/callback?code=${code}`, {
+      method: 'GET',
+    });
 
-  if (!payload.user.role) {
-    localStorage.setItem('onboarding_in_progress', 'true');
-  }
+    if (!response.ok) throw new Error('Failed to fetch login payload');
 
-  if (payload.token) localStorage.setItem('token', payload.token);
-  if (payload.user && payload.user.id) {
+    const payload = await response.json();
+
+    if (!payload.token || !payload.user) {
+      throw new Error('Invalid payload from backend');
+    }
+
+    // Save data to localStorage
+    localStorage.setItem('token', payload.token);
     localStorage.setItem('user_id', payload.user.id);
 
     if (payload.user.role) {
@@ -52,15 +45,17 @@ onMounted(async () => {
     } else {
       localStorage.setItem('onboarding_in_progress', 'true');
     }
+
+    const redirectPath = payload.redirect || '/login';
+    router.push(redirectPath);
+
+  } catch (err) {
+    console.error('OAuth callback failed:', err);
+    router.push('/login');
   }
-
-  console.log('Payload:', payload);
-  console.log('Redirect:', payload.redirect);
-
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  router.push(payload.redirect || '/login');
 });
 </script>
+
 
 
 
