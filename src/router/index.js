@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import axios from "axios"; 
 import Loginpage from "@/views/Loginpage.vue";
 import Signup from "@/views/Signup.vue";
@@ -14,7 +14,7 @@ import Application from "@/views/Application.vue";
 import Redirecting from "@/views/Redirecting.vue";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/login",
