@@ -44,12 +44,7 @@ onMounted(async () => {
   console.log('Redirect:', payload.redirect);
 
   await new Promise(resolve => setTimeout(resolve, 1000));
-  if (payload.redirect) {
-    const redirectPath = payload.redirect.replace(/\\\//g, '/');
-    router.push(redirectPath.startsWith('/') ? redirectPath : '/' + redirectPath);
-  } else {
-    router.push('/login');
-  }
+  router.push(payload.redirect || '/login');
 });
 </script>
 
