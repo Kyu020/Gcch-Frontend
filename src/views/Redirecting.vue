@@ -22,6 +22,14 @@ onMounted(async () => {
 
   const payloadRaw = params.get('payload');
 
+  
+  if (!payloadRaw) {
+    console.warn('No payload found in URL query params, redirecting to login.');
+    router.push('/login');
+    return;
+  }
+
+
   let payload = {};
   try {
     payload = JSON.parse(payloadRaw);
