@@ -14,10 +14,20 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 onMounted(async () => {
+  console.log('🔍 Redirecting component mounted');
+  console.log('🔍 Current URL:', window.location.href);
+  console.log('🔍 Hash:', window.location.hash);
+  console.log('🔍 Search:', window.location.search);
+
   const params = new URLSearchParams(window.location.search);
   const payloadRaw = params.get('payload');
 
+  console.log('🔍 Raw payload from URL:', payloadRaw);
+
   if (!payloadRaw) {
+    console.log('❌ No payload found - this is why it redirects to login');
+    console.log('🔍 Available URL params:', Array.from(params.entries()));
+    alert('No payload found! Check console for URL details');
     router.push('/login');
     return;
   }
@@ -25,17 +35,22 @@ onMounted(async () => {
   let payload;
   try {
     payload = JSON.parse(payloadRaw);
+    console.log('✅ Payload parsed successfully:', payload);
   } catch (e) {
-    console.error("Invalid payload:", e);
+    console.error("❌ Invalid payload:", e);
+    alert('Invalid payload: ' + e.message);
     router.push('/login');
     return;
   }
 
   if (!payload || !payload.user || !payload.user.id) {
-    console.error("Missing user info in payload");
+    console.error("❌ Missing user info in payload:", payload);
+    alert('Missing user info in payload');
     router.push('/login');
     return;
   }
+
+  console.log('✅ All validations passed, storing data...');
 
   // Store token and user info
   if (payload.token) localStorage.setItem('token', payload.token);
@@ -48,19 +63,14 @@ onMounted(async () => {
     localStorage.setItem('onboarding_in_progress', 'true');
   }
 
-  // Debug
-  console.log('Payload:', payload);
-
+  console.log('✅ Data stored, waiting 1 second...');
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   const redirectPath = (payload.redirect || '/login').replace(/\\/g, '');
-  console.log('Redirecting to:', redirectPath);
+  console.log('✅ Redirecting to:', redirectPath);
   router.push(redirectPath);
-
 });
 </script>
-
-
 
 <style scoped>
 .redirect-container {

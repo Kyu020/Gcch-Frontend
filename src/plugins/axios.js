@@ -14,7 +14,6 @@ const axiosInstance = axios.create({
     },
 });
 
-// Request interceptor with CSRF check
 axiosInstance.interceptors.request.use(
     async (config) => {
         const token = localStorage.getItem('token');
