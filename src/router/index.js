@@ -97,25 +97,28 @@ router.beforeEach(async (to, from, next) => {
   const publicPages = ['Login', 'Signup', 'Redirecting'];
   const authRequired = !publicPages.includes(to.name);
 
+  // ✅ Always allow access to public pages, especially Redirecting
+  if (!authRequired) {
+    return next();
+  }
+
+  // ✅ If not logged in and trying to access a protected page, redirect to login
+  if (!userId) {
+    return next({ name: 'Login' });
+  }
+
+  // ✅ If logged in and trying to go back to public pages like Login/Signup
   if (userId && publicPages.includes(to.name)) {
     if (onboarding || !role) {
-      return next(); // allow access to Redirecting or Signup
+      return next(); // allow to proceed to Signup
     }
 
     const fallback = role === 'company' ? 'CompanyDash' : 'ApplicantDash';
     return next({ name: fallback });
   }
 
-  if (!authRequired) {
-    return next();
-  }
-
-  if (authRequired && !userId) {
-    return next({ name: 'Login' });
-  }
-  
-
-  if (!role && !onboarding && !publicPages.includes(to.name)) {
+  // ✅ If role is missing, try to fetch it
+  if (!role && !onboarding) {
     try {
       const { data } = await axios.get(`/user/${userId}`);
       localStorage.setItem('user_role', data.role);
@@ -142,7 +145,6 @@ router.beforeEach(async (to, from, next) => {
 
   return next();
 });
-
 
 router.afterEach((to) => {
   const publicPages = ['Login', 'Signup', 'Redirecting'];
