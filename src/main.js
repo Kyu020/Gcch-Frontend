@@ -6,27 +6,24 @@ import router from "./router";
 
 const app = createApp(App);
 
-async function bootstrap() {
-    try {
-        app.config.globalProperties.$axios = axiosInstance;
-        app.use(createPinia());
-        app.use(router);
-        
-        await app.mount("#app");
-        console.log('App mounted successfully');
-    } catch (error) {
-        console.error("Bootstrap error:", error);
-        document.body.innerHTML = `
-            <div style="color: red; padding: 20px;">
-                Failed to initialize application. 
-                Please ensure the backend server is running.
-                Error: ${error.message}
-            </div>
-        `;
-    }
-}
+app.config.globalProperties.$axios = axiosInstance;
+app.use(createPinia());
+app.use(router);
 
-bootstrap();
+// ✅ WAIT for the router to be ready before mounting the app
+router.isReady().then(() => {
+  app.mount("#app");
+  console.log('App mounted successfully');
+}).catch(error => {
+  console.error("Router error:", error);
+  document.body.innerHTML = `
+      <div style="color: red; padding: 20px;">
+          Failed to initialize application. 
+          Please ensure the backend server is running.
+          Error: ${error.message}
+      </div>
+  `;
+});
 
 // Disable devtools
 app.config.devtools = false;
