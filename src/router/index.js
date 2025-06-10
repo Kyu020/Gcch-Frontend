@@ -106,8 +106,7 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: fallback });
   }
 
-
-  if (!authRequired && !userId) {
+  if (!authRequired) {
     return next();
   }
 
