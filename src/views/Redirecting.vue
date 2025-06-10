@@ -17,16 +17,30 @@ onMounted(async () => {
   console.log('🔍 Redirecting component mounted');
   console.log('🔍 Current URL:', window.location.href);
   console.log('🔍 Hash:', window.location.hash);
-  console.log('🔍 Search:', window.location.search);
+  console.log('🔍 Search (main URL):', window.location.search);
 
-  const params = new URLSearchParams(window.location.search);
+  // For hash routing, get query params from the hash portion
+  const hash = window.location.hash;
+  const hashParts = hash.split('?');
+  
+  console.log('🔍 Hash parts:', hashParts);
+  
+  let params;
+  if (hashParts.length > 1) {
+    // Get everything after the ? in the hash
+    const queryString = hashParts.slice(1).join('?');
+    params = new URLSearchParams(queryString);
+    console.log('🔍 Query string from hash:', queryString);
+  } else {
+    params = new URLSearchParams();
+  }
+
   const payloadRaw = params.get('payload');
-
-  console.log('🔍 Raw payload from URL:', payloadRaw);
+  console.log('🔍 Raw payload from hash:', payloadRaw);
 
   if (!payloadRaw) {
     console.log('❌ No payload found - this is why it redirects to login');
-    console.log('🔍 Available URL params:', Array.from(params.entries()));
+    console.log('🔍 Available URL params from hash:', Array.from(params.entries()));
     alert('No payload found! Check console for URL details');
     router.push('/login');
     return;
