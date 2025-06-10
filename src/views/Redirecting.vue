@@ -8,46 +8,49 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
 
 onMounted(async () => {
-  const code = route.query.code
-
-  if (!code) {
-    router.push('/login')
-    return
-  }
-
+  const params = new URLSearchParams(window.location.search);
+  const payloadRaw = params.get('payload');
+  let payload = {};
   try {
-    const response = await fetch(`https://gcch-backend-jto2/api/auth/google/callback?code=${code}`)
-    const payload = await response.json()
-
-    if (!payload.token || !payload.user) throw new Error('Invalid payload')
-
-    localStorage.setItem('token', payload.token)
-    localStorage.setItem('user_id', payload.user.id)
-
-    if (payload.user.role) {
-      localStorage.setItem('user_role', payload.user.role)
-      localStorage.removeItem('onboarding_in_progress')
-    } else {
-      localStorage.setItem('onboarding_in_progress', 'true')
-    }
-
-    router.push(payload.redirect || '/login')
-  } catch (err) {
-    console.error(err)
-    router.push('/login')
+    payload = JSON.parse(payloadRaw);
+  } catch (e) {
+    router.push('/login');
+    return;
   }
-})
+  if (!payload.user.role) {
+    localStorage.setItem('onboarding_in_progress', 'true');
+  }
+
+  // Store token and user info
+  if (payload.token) localStorage.setItem('token', payload.token);
+  if (payload.user && payload.user.id) {
+    localStorage.setItem('user_id', payload.user.id);
+    if (payload.user.role) {
+      localStorage.setItem('user_role', payload.user.role);
+      localStorage.removeItem('onboarding_in_progress');
+    } else {
+      localStorage.setItem('onboarding_in_progress', 'true');
+    }
+  }
+
+  // Debug logs
+  console.log('Payload:', payload);
+  console.log('Redirect:', payload.redirect);
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  if (payload.redirect) {
+    router.push(payload.redirect.replace(/\\/g, ''));
+  } else {
+    router.push('/login');
+  }
+});
 </script>
-
-
-
 
 
 <style scoped>
