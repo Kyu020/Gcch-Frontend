@@ -16,41 +16,48 @@ const router = useRouter();
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   const payloadRaw = params.get('payload');
-  let payload = {};
-  try {
-    payload = JSON.parse(payloadRaw);
-  } catch (e) {
+
+  if (!payloadRaw) {
     router.push('/login');
     return;
   }
-  if (!payload.user.role) {
-    localStorage.setItem('onboarding_in_progress', 'true');
+
+  let payload;
+  try {
+    payload = JSON.parse(payloadRaw);
+  } catch (e) {
+    console.error("Invalid payload:", e);
+    router.push('/login');
+    return;
+  }
+
+  if (!payload || !payload.user || !payload.user.id) {
+    console.error("Missing user info in payload");
+    router.push('/login');
+    return;
   }
 
   // Store token and user info
   if (payload.token) localStorage.setItem('token', payload.token);
-  if (payload.user && payload.user.id) {
-    localStorage.setItem('user_id', payload.user.id);
-    if (payload.user.role) {
-      localStorage.setItem('user_role', payload.user.role);
-      localStorage.removeItem('onboarding_in_progress');
-    } else {
-      localStorage.setItem('onboarding_in_progress', 'true');
-    }
+  localStorage.setItem('user_id', payload.user.id);
+
+  if (payload.user.role) {
+    localStorage.setItem('user_role', payload.user.role);
+    localStorage.removeItem('onboarding_in_progress');
+  } else {
+    localStorage.setItem('onboarding_in_progress', 'true');
   }
 
-  // Debug logs
+  // Debug
   console.log('Payload:', payload);
-  console.log('Redirect:', payload.redirect);
 
   await new Promise(resolve => setTimeout(resolve, 1000));
-  if (payload.redirect) {
-    router.push(payload.redirect.replace(/\\/g, ''));
-  } else {
-    router.push('/login');
-  }
+
+  const redirectPath = (payload.redirect || '/login').replace(/\\/g, '');
+  router.push(redirectPath);
 });
 </script>
+
 
 
 <style scoped>
