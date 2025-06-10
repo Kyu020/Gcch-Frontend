@@ -90,6 +90,10 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  if (to.name === 'Redirecting') {
+    return next(); // 🚨 Always allow Redirecting page to run — it handles login setup
+  }
+
   const userId = localStorage.getItem('user_id');
   const role = localStorage.getItem('user_role');
   const onboarding = localStorage.getItem('onboarding_in_progress') === 'true';
