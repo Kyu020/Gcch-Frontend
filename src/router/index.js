@@ -98,13 +98,14 @@ router.beforeEach(async (to, from, next) => {
   const authRequired = !publicPages.includes(to.name);
 
   if (userId && publicPages.includes(to.name)) {
-    if (onboarding && (to.name === 'Signup' || to.name === 'Redirecting')) {
-      return next();
+    if (onboarding || !role) {
+      return next(); // allow access to Redirecting or Signup
     }
 
-    const fallback = role === 'company' || 'applicant' ? 'CompanyDash' : 'ApplicantDash';
+    const fallback = role === 'company' ? 'CompanyDash' : 'ApplicantDash';
     return next({ name: fallback });
   }
+
 
   if (!authRequired && !userId) {
     return next();
