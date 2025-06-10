@@ -23,7 +23,7 @@ onMounted(async () => {
   }
 
   try {
-    const response = await fetch(`https://your-backend.com/api/auth/google/callback?code=${code}`)
+    const response = await fetch(`https://gcch-backend-jto2/api/auth/google/callback?code=${code}`)
     const payload = await response.json()
 
     if (!payload.token || !payload.user) throw new Error('Invalid payload')
