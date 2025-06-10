@@ -8,53 +8,44 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
-const router = useRouter();
-const route = useRoute();
+const router = useRouter()
+const route = useRoute()
 
 onMounted(async () => {
-  const code = route.query.code;
+  const code = route.query.code
 
   if (!code) {
-    router.push('/login');
-    return;
+    router.push('/login')
+    return
   }
 
   try {
-    const response = await fetch(`https://your-backend.com/api/auth/google/callback?code=${code}`, {
-      method: 'GET',
-    });
+    const response = await fetch(`https://your-backend.com/api/auth/google/callback?code=${code}`)
+    const payload = await response.json()
 
-    if (!response.ok) throw new Error('Failed to fetch login payload');
+    if (!payload.token || !payload.user) throw new Error('Invalid payload')
 
-    const payload = await response.json();
-
-    if (!payload.token || !payload.user) {
-      throw new Error('Invalid payload from backend');
-    }
-
-    // Save data to localStorage
-    localStorage.setItem('token', payload.token);
-    localStorage.setItem('user_id', payload.user.id);
+    localStorage.setItem('token', payload.token)
+    localStorage.setItem('user_id', payload.user.id)
 
     if (payload.user.role) {
-      localStorage.setItem('user_role', payload.user.role);
-      localStorage.removeItem('onboarding_in_progress');
+      localStorage.setItem('user_role', payload.user.role)
+      localStorage.removeItem('onboarding_in_progress')
     } else {
-      localStorage.setItem('onboarding_in_progress', 'true');
+      localStorage.setItem('onboarding_in_progress', 'true')
     }
 
-    const redirectPath = payload.redirect || '/login';
-    router.push(redirectPath);
-
+    router.push(payload.redirect || '/login')
   } catch (err) {
-    console.error('OAuth callback failed:', err);
-    router.push('/login');
+    console.error(err)
+    router.push('/login')
   }
-});
+})
 </script>
+
 
 
 
