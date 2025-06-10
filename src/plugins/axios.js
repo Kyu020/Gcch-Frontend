@@ -5,7 +5,7 @@ import 'mosha-vue-toastify/dist/style.css';
 
 const axiosInstance = axios.create({
     //baseURL: 'http://localhost:8000/api', // Changed from localhost to 127.0.0.1
-    baseUrl: 'https://gcch-backend-jto2.onrender.com/api', // Use this for production
+    baseURL:'https://gcch-backend-jto2.onrender.com/api', // Use this for production
     withCredentials: false,
     headers: {
         'Content-Type': 'application/json',
